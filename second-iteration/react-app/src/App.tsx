@@ -1,22 +1,17 @@
 import { useState } from "react";
-import Button from "./components/Button";
-import Alert1 from "./components/Alert1";
-
-// let items = ["New Delhi", "New york", "Tokyo", "Bangluru", "London", "Paris"];
-// const handleSelectedItem = (thing: string) => {
-//   console.log(thing);
-// };
+import Like from "./components/Like";
 
 function App() {
-  const [isAlert, setIsAlert] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleClick = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) console.log("liked");
+  };
+
   return (
     <div>
-      <Alert1 showAlert={isAlert} handleCross={() => setIsAlert(false)} />
-      <Button
-        color="primary"
-        handleClick={() => setIsAlert(true)}
-        children="Click Me"
-      />
+      <Like onClick={handleClick} isLiked={isLiked} />
     </div>
   );
 }
