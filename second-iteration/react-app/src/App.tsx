@@ -1,18 +1,10 @@
-import { useState } from "react";
-import Like from "./components/Like";
+import Form from "./components/Form";
 
 function App() {
-  const [isLiked, setIsLiked] = useState(false);
-
-  const handleClick = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) console.log("liked");
-  };
-
   return (
-    <div>
-      <Like onClick={handleClick} isLiked={isLiked} />
-    </div>
+    <>
+      <Form />
+    </>
   );
 }
 
