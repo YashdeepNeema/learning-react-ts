@@ -1,39 +1,77 @@
-import { useState } from "react";
-import ExpenseFilter from "./components/ExpenseFilter";
-import ListExpense from "./components/ExpenseList";
-import ExpenxeForm from "./components/ExpenxeForm";
+import "bootstrap/dist/css/bootstrap.css";
+import userService, { User } from "./services/userService";
+import useUsers from "./hooks/useUsers";
 
 function App() {
-  const [expenses, setExpenses] = useState([
-    { id: 1, description: "aaaa", amount: 10, category: "Groceries" },
-    { id: 2, description: "baaa", amount: 10, category: "Entertainment" },
-    { id: 3, description: "caaa", amount: 10, category: "Groceries" },
-    { id: 4, description: "daaa", amount: 10, category: "Utilities" },
-    { id: 5, description: "faaa", amount: 10, category: "Entertainment" },
-  ]);
+  const { users, error, isLoading, setError, setUsers } = useUsers();
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const handleSelectCategory = (category: string) => {
-    setSelectedCategory(category);
+  const deleteUser = (user: User) => {
+    const originalUsers = [...users];
+    setUsers(users.filter((u) => u.id !== user.id));
+
+    userService.delete(user.id).catch((err) => {
+      setError(err.message);
+      setUsers(originalUsers);
+    });
   };
 
-  const onDelete = (id: number) => {
-    setExpenses(expenses.filter((expense) => id !== expense.id));
-  };
+  const addUser = () => {
+    const originalUsers = [...users];
+    const newUser = { id: 0, name: "Mosh", username: "Moshu" };
+    setUsers([newUser, ...users]);
 
-  const visibleExpenses = selectedCategory
-    ? expenses.filter((exp) => exp.category === selectedCategory)
-    : expenses;
+    userService
+      .create(newUser)
+      .then((res) => setUsers([res.data, ...users]))
+      .catch((err) => {
+        setError(err.message);
+        setUsers(originalUsers);
+      });
+  };
+  function updateUser(user: User) {
+    const updatedUser = { ...user, name: "-1" };
+    const originalUsers = [...users];
+    setUsers(
+      users.map((u) => (u.id === user.id ? { ...user, name: "-1" } : u))
+    );
+
+    userService.update<User>(updatedUser).catch((err) => {
+      setError(err);
+      setUsers(originalUsers);
+    });
+  }
 
   return (
     <>
-      <ExpenxeForm
-        onSubmit={(exp) =>
-          setExpenses([...expenses, { ...exp, id: expenses.length + 1 }])
-        }
-      />
-      <ExpenseFilter onSelectCategory={(cat) => handleSelectCategory(cat)} />
-      <ListExpense expenses={visibleExpenses} onDelete={onDelete} />
+      {error && <p className="text-danger">{error}</p>}
+      {isLoading && <div className="spinner-border" role="status"></div>}
+      <button className="btn btn-primary mb-3" onClick={addUser}>
+        Add User
+      </button>
+      <ul className="list-group">
+        {users.map((user) => (
+          <li
+            className="list-group-item d-flex justify-content-between"
+            key={user.id}
+          >
+            {user.name}
+            <div>
+              <button
+                className="btn btn-outline-secondary mx-1"
+                onClick={() => updateUser(user)}
+              >
+                Update
+              </button>
+              <button
+                onClick={() => deleteUser(user)}
+                className="btn btn-outline-danger"
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
